@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useMemo } from "react";
 import { Box, Flex, Heading, Text, Button, Menu, MenuButton, MenuList, MenuItem, Avatar, Table, Thead, Tbody, Tr, Th, Td, Input, Select, useDisclosure } from "@chakra-ui/react";
 import NewDiseaseModal from "./NewDiseaseModal";
 import { FaChevronDown } from "react-icons/fa";
@@ -19,6 +19,7 @@ const Index = () => {
     { name: "Sea Lice", severity: "Medium", treatment: "Chemical bath" },
     { name: "Amoebic Gill Disease", severity: "Low", treatment: "Freshwater bath" },
   ]);
+  const [sortConfig, setSortConfig] = useState({ key: null, direction: "" });
   const { isOpen, onOpen, onClose } = useDisclosure();
 
   const handleAddDisease = (newDisease) => {
@@ -26,7 +27,31 @@ const Index = () => {
     onClose();
   };
 
-  const filteredDiagnoses = diagnoses.filter((diagnosis) => {
+  const handleSort = (key) => {
+    let direction = "asc";
+    if (sortConfig.key === key && sortConfig.direction === "asc") {
+      direction = "desc";
+    }
+    setSortConfig({ key, direction });
+  };
+
+  const sortedDiagnoses = useMemo(() => {
+    let sortedData = [...diagnoses];
+    if (sortConfig.key) {
+      sortedData.sort((a, b) => {
+        if (a[sortConfig.key] < b[sortConfig.key]) {
+          return sortConfig.direction === "asc" ? -1 : 1;
+        }
+        if (a[sortConfig.key] > b[sortConfig.key]) {
+          return sortConfig.direction === "asc" ? 1 : -1;
+        }
+        return 0;
+      });
+    }
+    return sortedData;
+  }, [diagnoses, sortConfig]);
+
+  const filteredDiagnoses = sortedDiagnoses.filter((diagnosis) => {
     return diagnosis.name.toLowerCase().includes(searchTerm.toLowerCase()) && (selectedSeverity === "" || diagnosis.severity === selectedSeverity);
   });
 
@@ -90,9 +115,21 @@ const Index = () => {
         <Table variant="simple">
           <Thead>
             <Tr>
-              <Th>Name</Th>
-              <Th>Severity</Th>
-              <Th>Treatment</Th>
+              <Th>
+                <Button variant="link" onClick={() => handleSort("name")}>
+                  Name
+                </Button>
+              </Th>
+              <Th>
+                <Button variant="link" onClick={() => handleSort("severity")}>
+                  Severity
+                </Button>
+              </Th>
+              <Th>
+                <Button variant="link" onClick={() => handleSort("treatment")}>
+                  Treatment
+                </Button>
+              </Th>
             </Tr>
           </Thead>
           <Tbody>

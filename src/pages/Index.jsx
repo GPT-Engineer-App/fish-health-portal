@@ -1,5 +1,6 @@
 import React, { useState } from "react";
-import { Box, Flex, Heading, Text, Button, Menu, MenuButton, MenuList, MenuItem, Avatar, Table, Thead, Tbody, Tr, Th, Td, Input, Select } from "@chakra-ui/react";
+import { Box, Flex, Heading, Text, Button, Menu, MenuButton, MenuList, MenuItem, Avatar, Table, Thead, Tbody, Tr, Th, Td, Input, Select, useDisclosure } from "@chakra-ui/react";
+import NewDiseaseModal from "./NewDiseaseModal";
 import { FaChevronDown } from "react-icons/fa";
 
 const diagnoses = [
@@ -12,6 +13,18 @@ const diagnoses = [
 const Index = () => {
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedSeverity, setSelectedSeverity] = useState("");
+  const [diagnoses, setDiagnoses] = useState([
+    { name: "Pancreas Disease", severity: "High", treatment: "Antibiotics" },
+    { name: "Infectious Salmon Anemia", severity: "Critical", treatment: "Culling" },
+    { name: "Sea Lice", severity: "Medium", treatment: "Chemical bath" },
+    { name: "Amoebic Gill Disease", severity: "Low", treatment: "Freshwater bath" },
+  ]);
+  const { isOpen, onOpen, onClose } = useDisclosure();
+
+  const handleAddDisease = (newDisease) => {
+    setDiagnoses([...diagnoses, newDisease]);
+    onClose();
+  };
 
   const filteredDiagnoses = diagnoses.filter((diagnosis) => {
     return diagnosis.name.toLowerCase().includes(searchTerm.toLowerCase()) && (selectedSeverity === "" || diagnosis.severity === selectedSeverity);
@@ -92,7 +105,11 @@ const Index = () => {
             ))}
           </Tbody>
         </Table>
+        <Button onClick={onOpen} mt={4}>
+          Add New Disease
+        </Button>
       </Box>
+      <NewDiseaseModal isOpen={isOpen} onClose={onClose} onSubmit={handleAddDisease} />
     </Box>
   );
 };
